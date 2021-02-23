@@ -1,100 +1,108 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.bilalahmad.snakeandladder.MainActivity">
+    tools:context=".MainActivity">
 
-    <RelativeLayout
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_above="@+id/dice"
+      android:layout_alignParentTop="true">
+
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/TextAppearance.MaterialComponents.Subtitle1"
+        android:id="@+id/playerPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="5dp"
+        android:text="@string/label_player_user"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/TextAppearance.MaterialComponents.Subtitle1"
+        android:id="@+id/gameStatus"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_centerHorizontal="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="5dp"
+        android:gravity="end"
+        android:text="@string/game_status"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        style="@style/TextAppearance.MaterialComponents.Subtitle1"
+        android:id="@+id/computerPosition"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="5dp"
+        android:gravity="end"
+        android:text="@string/label_player_computer"/>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/board"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_above="@+id/dice"
-        android:layout_alignParentTop="true">
+        android:scaleType="fitEnd"
+        app:srcCompat="@drawable/maze"/>
 
-        <TextView
-            android:id="@+id/playerPosition"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
-            android:text="Player\n1"/>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="centerInside"
+        android:layout_below="@id/playerPosition"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorPlayer"/>
 
-        <TextView
-            android:id="@+id/gameStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
-            android:gravity="end"
-            android:text="Player's Turn"/>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="centerInside"
+        android:layout_below="@id/computerPosition"
+        android:layout_alignParentEnd="true"
+        android:layout_alignParentRight="true"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorComputer"/>
 
-        <TextView
-            android:id="@+id/computerPosition"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
-            android:gravity="end"
-            android:text="Computer\n1"/>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/userPiece"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorPlayer"/>
 
-        <ImageView
-            android:id="@+id/board"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitEnd"
-            app:srcCompat="@drawable/maze" />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/computerPiece"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorComputer"/>
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:layout_below="@id/playerPosition"
-            android:layout_alignParentLeft="true"
-            android:tint="#0f0"/>
+  </RelativeLayout>
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:layout_below="@id/computerPosition"
-            android:layout_alignParentRight="true"
-            android:tint="#f00"/>
-
-        <ImageView
-            android:id="@+id/userPiece"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:tint="#0f0"
-            android:visibility="gone"/>
-
-        <ImageView
-            android:id="@+id/computerPiece"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:tint="#f00"
-            android:visibility="gone"/>
-
-    </RelativeLayout>
-
-    <ImageView
-        android:id="@+id/dice"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:layout_margin="15dp"
-        app:srcCompat="@drawable/one"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="takeTurn"/>
+  <androidx.appcompat.widget.AppCompatImageView
+      android:id="@+id/dice"
+      android:layout_width="75dp"
+      android:layout_height="75dp"
+      android:layout_margin="15dp"
+      android:layout_alignParentBottom="true"
+      android:layout_centerHorizontal="true"
+      android:onClick="takeTurn"
+      app:srcCompat="@drawable/one"/>
 
 </RelativeLayout>
