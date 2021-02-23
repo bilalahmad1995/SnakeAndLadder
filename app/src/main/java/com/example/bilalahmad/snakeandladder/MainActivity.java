@@ -2,13 +2,13 @@ package com.example.bilalahmad.snakeandladder;
 
 import android.graphics.Point;
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.ArrayList;
 
@@ -16,20 +16,20 @@ public class MainActivity extends AppCompatActivity {
 
     private ImageView dice;
 
-    private Point SIZE = new Point();
+    private final Point SIZE = new Point();
 
     private boolean isOver = false;
 
     private int player;
     private int computer;
     private int currentPlayer;
-    private ArrayList<GameObject> snakes = new ArrayList<>();
-    private ArrayList<GameObject> ladders = new ArrayList<>();
+    private final ArrayList<GameObject> snakes = new ArrayList<>();
+    private final ArrayList<GameObject> ladders = new ArrayList<>();
 
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        dice = (ImageView) findViewById(R.id.dice);
+        dice = findViewById(R.id.dice);
 
         snakes.add(new GameObject(22, 3));
         snakes.add(new GameObject(14, 8));
@@ -105,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
                 }
             }
         }
-        ((TextView) findViewById(R.id.computerPosition)).setText("Computer\n" + String.valueOf(computer));
+        ((TextView) findViewById(R.id.computerPosition)).setText("Computer\n" + computer);
         moveOnScreen(R.id.computerPiece, oldPosition, computer);
 
     }
@@ -140,7 +140,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }
-        ((TextView) findViewById(R.id.playerPosition)).setText("Player\n" + String.valueOf(player));
+        ((TextView) findViewById(R.id.playerPosition)).setText("Player\n" + player);
         moveOnScreen(R.id.userPiece, oldPosition, player);
     }
 
@@ -163,7 +163,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void moveOnScreen(int id, int oldPosition, int newPosition) {
 
-        ((TextView) findViewById(R.id.gameStatus)).setText("P"+ String.valueOf(currentPlayer) +" rolling dice ...");
+        ((TextView) findViewById(R.id.gameStatus)).setText("P" + currentPlayer + " rolling dice ...");
 
         int x1 = getX(oldPosition);
         int y1 = getY(oldPosition);
@@ -176,7 +176,7 @@ public class MainActivity extends AppCompatActivity {
         animation.setAnimationListener(new Animation.AnimationListener() {
             @Override
             public void onAnimationStart(Animation animation) {
-                ((TextView) findViewById(R.id.gameStatus)).setText("Moving player " + String.valueOf(currentPlayer) + "...");
+                ((TextView) findViewById(R.id.gameStatus)).setText("Moving player " + currentPlayer + "...");
             }
 
             @Override
@@ -257,8 +257,8 @@ public class MainActivity extends AppCompatActivity {
 
     private class GameObject {
 
-        private int head;
-        private int tail;
+        private final int head;
+        private final int tail;
 
         private GameObject(int head, int tail) {
             this.head = head;
