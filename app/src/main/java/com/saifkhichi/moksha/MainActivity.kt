@@ -10,43 +10,28 @@ import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import java.util.*
+import com.saifkhichi.moksha.models.AI
+import com.saifkhichi.moksha.models.GBoard
+import com.saifkhichi.moksha.models.GPlayer
+import com.saifkhichi.moksha.models.User
+import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
+
+    private val board = GBoard()
+    private val ai = AI("Computer", R.id.computerPiece)
+    private val user = User("Player", R.id.userPiece)
+
     private var dice: ImageView? = null
     private val SIZE = Point()
     private var isOver = false
-    private var player = 0
-    private var computer = 0
+
     private var currentPlayer = 0
-    private val snakes = ArrayList<GameObject>()
-    private val ladders = ArrayList<GameObject>()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         dice = findViewById(R.id.dice)
-        snakes.add(GameObject(22, 3))
-        snakes.add(GameObject(14, 8))
-        snakes.add(GameObject(31, 15))
-        snakes.add(GameObject(41, 20))
-        snakes.add(GameObject(58, 37))
-        snakes.add(GameObject(67, 50))
-        snakes.add(GameObject(77, 56))
-        snakes.add(GameObject(83, 80))
-        snakes.add(GameObject(92, 76))
-        snakes.add(GameObject(99, 5))
-        ladders.add(GameObject(23, 2))
-        ladders.add(GameObject(13, 9))
-        ladders.add(GameObject(93, 17))
-        ladders.add(GameObject(54, 29))
-        ladders.add(GameObject(51, 32))
-        ladders.add(GameObject(80, 39))
-        ladders.add(GameObject(78, 62))
-        ladders.add(GameObject(44, 64))
-        ladders.add(GameObject(96, 75))
-        ladders.add(GameObject(89, 70))
-        player = 1
-        computer = 1
         currentPlayer = 1
         windowManager.defaultDisplay.getSize(SIZE)
         findViewById<View>(R.id.board).post { SIZE.y = findViewById<View>(R.id.board).height }
@@ -54,60 +39,73 @@ class MainActivity : AppCompatActivity() {
 
     fun takeTurn(v: View?) {
         if (!isOver) {
-            val diceValue = getDice()
+            val diceValue = rollDice(user)
             if (currentPlayer == 1) {
-                playersTurn(diceValue)
+                takeTurn(user, diceValue)
             }
         }
     }
 
-    private fun computerTurn(diceValue: Int) {
-        val oldPosition = computer
-        computer += diceValue
-        if (computer == 100) {
-            Toast.makeText(this, "Computer wins!", Toast.LENGTH_SHORT).show()
-            isOver = true
-        } else if (computer > 100) {
-            computer -= diceValue
-        } else {
-            for (snake in snakes) {
-                if (snake.head == computer) {
-                    computer = snake.tail
-                }
-            }
-            for (ladder in ladders) {
-                if (ladder.tail == computer) {
-                    computer = ladder.head
+    private fun takeTurn(player: GPlayer, steps: Int) {
+        // Move the player
+        if (player.canMove(steps)) {
+            val lastPosition = player.position
+            val newPosition = lastPosition + steps
+
+            // Run animation before moving the player
+            moveBySteps(player, lastPosition, newPosition) {
+                player.move(steps)
+
+                // Check if the player has won
+                if (player.hasWon()) {
+                    Toast.makeText(this, "${player.name} wins!", Toast.LENGTH_SHORT).show()
+                    isOver = true
+                    onOver()
+                } else {
+                    board.snakes.forEach { snake ->
+                        if (player.isOn(snake)) {
+                            snake.bite(player)
+                        }
+                    }
+
+                    board.ladders.forEach { ladder ->
+                        if (player.isOn(ladder)) {
+                            ladder.ascend(player)
+                        }
+                    }
+
+                    moveDirect(player, newPosition, player.position) {
+                        // Update UI
+                        when (player) {
+                            is AI -> findViewById<TextView>(R.id.computerPosition)
+                            is User -> findViewById(R.id.playerPosition)
+                        }.text = "${player.name}\n${player.position}"
+
+                        // Check post-conditions
+                        onMoved()
+                    }
                 }
             }
         }
-        (findViewById<View>(R.id.computerPosition) as TextView).text = "Computer\n$computer"
-        moveOnScreen(R.id.computerPiece, oldPosition, computer)
     }
 
-    private fun playersTurn(diceValue: Int) {
-        val oldPosition = player
-        player += diceValue
-        // Wins
-        if (player == 100) {
-            Toast.makeText(this, "Player wins!", Toast.LENGTH_SHORT).show()
-            isOver = true
-        } else if (player > 100) {
-            player -= diceValue
-        } else {
-            for (snake in snakes) {
-                if (snake.head == player) {
-                    player = snake.tail
-                }
+    private fun onOver() {
+        setStatus("Game Over!")
+    }
+
+    private fun onMoved() {
+        if (isOver) onOver()
+        else when (currentPlayer) {
+            1 -> {
+                currentPlayer = 2
+                setStatus("${ai.name}'s Turn")
+                takeTurn(ai, rollDice(ai))
             }
-            for (ladder in ladders) {
-                if (ladder.tail == player) {
-                    player = ladder.head
-                }
+            2 -> {
+                currentPlayer = 1
+                setStatus("${user.name}'s Turn")
             }
         }
-        (findViewById<View>(R.id.playerPosition) as TextView).text = "Player\n$player"
-        moveOnScreen(R.id.userPiece, oldPosition, player)
     }
 
     private fun getX(position: Int): Int {
@@ -125,71 +123,82 @@ class MainActivity : AppCompatActivity() {
         return SIZE.y - (row / 10f * SIZE.x).toInt()
     }
 
-    private fun moveOnScreen(id: Int, oldPosition: Int, newPosition: Int) {
-        (findViewById<View>(R.id.gameStatus) as TextView).text = "P$currentPlayer rolling dice ..."
-        val x1 = getX(oldPosition)
-        val y1 = getY(oldPosition)
-        val x2 = getX(newPosition)
-        val y2 = getY(newPosition)
+    private fun moveDirect(player: GPlayer, from: Int, to: Int, onMoved: (p: Int) -> Unit) = runOnUiThread {
+        val x1 = getX(from)
+        val y1 = getY(from)
+        val x2 = getX(to)
+        val y2 = getY(to)
         val animation = TranslateAnimation(x1.toFloat(), x2.toFloat(), y1.toFloat(), y2.toFloat())
-        animation.duration = 500
+
+        val steps = abs(to - from)
+        animation.duration = when (steps == 1) {
+            true -> 250L
+            else -> (250 * (1 + steps / 10)).toLong()
+        }
         animation.setAnimationListener(object : AnimationListener {
             override fun onAnimationStart(animation: Animation) {
-                (findViewById<View>(R.id.gameStatus) as TextView).text = "Moving player $currentPlayer..."
+                setStatus("Moving player $currentPlayer...")
             }
 
             override fun onAnimationEnd(animation: Animation) {
-                if (currentPlayer == 1) {
-                    currentPlayer = 2
-                    (findViewById<View>(R.id.gameStatus) as TextView).text = "Computer's Turn"
-                    computerTurn(getDice())
-                } else if (currentPlayer == 2) {
-                    currentPlayer = 1
-                    (findViewById<View>(R.id.gameStatus) as TextView).text = "Player's Turn"
-                }
-                if (isOver) {
-                    (findViewById<View>(R.id.gameStatus) as TextView).text = "Game Over!"
-                }
+                onMoved(to)
             }
 
             override fun onAnimationRepeat(animation: Animation) {}
         })
         animation.fillAfter = true
-        findViewById<View>(id).visibility = View.VISIBLE
-        findViewById<View>(id).startAnimation(animation)
+        findViewById<View>(player.view).visibility = View.VISIBLE
+        findViewById<View>(player.view).startAnimation(animation)
     }
 
-    fun getDice(): Int {
-        val dice = (Math.random() * 6).toInt() + 1
-        when (dice) {
-            1 -> this.dice!!.setImageResource(R.drawable.one)
-            2 -> this.dice!!.setImageResource(R.drawable.two)
-            3 -> this.dice!!.setImageResource(R.drawable.three)
-            4 -> this.dice!!.setImageResource(R.drawable.four)
-            5 -> this.dice!!.setImageResource(R.drawable.five)
-            6 -> this.dice!!.setImageResource(R.drawable.six)
+    private fun moveBySteps(player: GPlayer, current: Int, final: Int, onEnd: () -> Unit) {
+        var next = if (final > current) current + 1 else current - 1
+        moveDirect(player, current, next) { position ->
+            if (position != final) {
+                next = if (final > current) current + 1 else current - 1
+                moveBySteps(player, position, final, onEnd)
+            } else {
+                onEnd()
+            }
         }
-        return dice
     }
 
-    //
-    //        public boolean onTouchEvent(MotionEvent event) {
-    //
-    //        ImageView img_animation = (ImageView) findViewById(R.id.maze);
-    //        int[] viewCoords = new int[2];
-    //        img_animation.getLocationOnScreen(viewCoords);
-    //
-    //        int touchX = (int) event.getX();
-    //        int touchY = (int) event.getY();
-    //
-    //        int imageX = touchX - viewCoords[0]; // viewCoords[0] is the X coordinate
-    //        int imageY = touchY - viewCoords[1]; // viewCoords[1] is the y coordinate
-    //
-    //        // float x = event.getX();
-    //        //float y = event.getY();
-    //        Toast.makeText(MainActivity.this,"X = "+imageX+" and y ="+imageY,Toast.LENGTH_SHORT).show();
-    //        return super.onTouchEvent(event);
-    //    }
-    private inner class GameObject constructor(val head: Int, val tail: Int)
+    private fun rollDice(player: GPlayer): Int {
+        setStatus("${player.name} rolling dice...")
+        val diceImages = arrayOf(
+            R.drawable.one,
+            R.drawable.two,
+            R.drawable.three,
+            R.drawable.four,
+            R.drawable.five,
+            R.drawable.six,
+        )
+
+        val value = (Math.random() * 6).toInt()
+        this.dice?.setImageResource(diceImages[value])
+        setStatus("${player.name} rolled ${value + 1}...")
+        return value + 1
+    }
+
+    private fun setStatus(status: String) = runOnUiThread {
+        findViewById<TextView>(R.id.gameStatus).text = status
+    }
+
+//    public boolean onTouchEvent(MotionEvent event) {
+//        ImageView img_animation = (ImageView) findViewById(R.id.maze);
+//        int[] viewCoords = new int[2];
+//        img_animation.getLocationOnScreen(viewCoords);
+//
+//        int touchX = (int) event.getX();
+//        int touchY = (int) event.getY();
+//
+//        int imageX = touchX - viewCoords[0]; // viewCoords[0] is the X coordinate
+//        int imageY = touchY - viewCoords[1]; // viewCoords[1] is the y coordinate
+//
+//        // float x = event.getX();
+//        //float y = event.getY();
+//        Toast.makeText(MainActivity.this,"X = "+imageX+" and y ="+imageY,Toast.LENGTH_SHORT).show();
+//        return super.onTouchEvent(event);
+//    }
 
 }
