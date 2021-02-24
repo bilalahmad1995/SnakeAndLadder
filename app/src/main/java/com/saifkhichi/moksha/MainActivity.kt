@@ -7,10 +7,10 @@ import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.TranslateAnimation
 import android.widget.TextView
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import com.saifkhichi.moksha.models.*
 import kotlin.math.abs
+import kotlin.math.roundToInt
 
 class MainActivity : AppCompatActivity() {
 
@@ -22,6 +22,9 @@ class MainActivity : AppCompatActivity() {
     private val SIZE = Point()
     private var isOver = false
 
+    private var dx = 0f
+    private var dy = 0f
+
     private var currentPlayer = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -30,9 +33,16 @@ class MainActivity : AppCompatActivity() {
 
         die = Die(findViewById(R.id.dice))
         currentPlayer = 1
+        setStatus("Your turn. Roll the dice!")
 
         windowManager.defaultDisplay.getSize(SIZE)
-        findViewById<View>(R.id.board).post { SIZE.y = findViewById<View>(R.id.board).height }
+        val boardContainer = findViewById<View>(R.id.board_container)
+        boardContainer.post {
+            dx = boardContainer.x
+            dy = (0.015 * boardContainer.width).toFloat()
+            SIZE.x = (0.985 * boardContainer.width).roundToInt()
+            SIZE.y = (boardContainer.height * 1.6f).roundToInt()
+        }
     }
 
     fun takeTurn(v: View?) {
@@ -47,64 +57,57 @@ class MainActivity : AppCompatActivity() {
 
     private fun takeTurn(player: GPlayer, steps: Int) {
         // Move the player
-        if (player.canMove(steps)) {
-            val lastPosition = player.position
-            val newPosition = lastPosition + steps
+        if (!player.canMove(steps)) return onMoved()
+        val lastPosition = player.position
+        val newPosition = lastPosition + steps
 
-            // Run animation before moving the player
-            moveBySteps(player, lastPosition, newPosition) {
-                player.move(steps)
+        // Run animation before moving the player
+        moveBySteps(player, lastPosition, newPosition) {
+            player.move(steps)
 
-                // Check if the player has won
-                if (player.hasWon()) {
-                    Toast.makeText(this, "${player.name} wins!", Toast.LENGTH_SHORT).show()
-                    isOver = true
-                    onOver()
-                } else {
-                    board.snakes.forEach { snake ->
-                        if (player.isOn(snake)) {
-                            snake.bite(player)
-                        }
+            // Check if the player has won
+            if (player.hasWon()) {
+                setStatus("You ${if (player is User) "won" else "lost"}! Game over.")
+                isOver = true
+            } else {
+                board.snakes.forEach { snake ->
+                    if (player.isOn(snake)) {
+                        snake.bite(player)
                     }
+                }
 
-                    board.ladders.forEach { ladder ->
-                        if (player.isOn(ladder)) {
-                            ladder.ascend(player)
-                        }
+                board.ladders.forEach { ladder ->
+                    if (player.isOn(ladder)) {
+                        ladder.ascend(player)
                     }
+                }
 
-                    moveDirect(player, newPosition, player.position) {
-                        // Update UI
-                        when (player) {
-                            is AI -> findViewById<TextView>(R.id.computerPosition)
-                            is User -> findViewById(R.id.playerPosition)
-                        }.text = "${player.name}\n${player.position}"
+                moveDirect(player, newPosition, player.position) {
+                    // Update UI
+                    when (player) {
+                        is AI -> findViewById<TextView>(R.id.computerPosition)
+                        is User -> findViewById(R.id.playerPosition)
+                    }.text = "${player.name}\n${player.position}"
 
-                        // Check post-conditions
-                        onMoved()
-                    }
+                    // Check post-conditions
+                    onMoved()
                 }
             }
         }
     }
 
-    private fun onOver() {
-        setStatus("Game Over!")
-    }
-
     private fun onMoved() {
-        if (isOver) onOver()
-        else when (currentPlayer) {
+        if (!isOver) when (currentPlayer) {
             1 -> {
                 currentPlayer = 2
-                setStatus("${ai.name}'s Turn")
+                setStatus("${ai.name}'s turn.")
                 rollDice(ai) { value ->
                     takeTurn(ai, value)
                 }
             }
             2 -> {
                 currentPlayer = 1
-                setStatus("${user.name}'s Turn")
+                setStatus("Your turn. Roll the dice!")
             }
         }
     }
@@ -115,13 +118,13 @@ class MainActivity : AppCompatActivity() {
         var row = position / 10
         row = if (position % 10 == 0) row - 1 else row
         col = if (row % 2 != 0) 10 - col else col - 1
-        return (col / 10f * SIZE.x).toInt()
+        return (dx + col / 10f * SIZE.x).toInt()
     }
 
     private fun getY(position: Int): Int {
         var row = position / 10
         row = if (position % 10 == 0) row else row + 1
-        return SIZE.y - (row / 10f * SIZE.x).toInt()
+        return (SIZE.y - (row / 10f * SIZE.x) - dy).roundToInt()
     }
 
     private fun moveDirect(player: GPlayer, from: Int, to: Int, onMoved: (p: Int) -> Unit) = runOnUiThread {
@@ -138,7 +141,7 @@ class MainActivity : AppCompatActivity() {
         }
         animation.setAnimationListener(object : AnimationListener {
             override fun onAnimationStart(animation: Animation) {
-                setStatus("Moving player $currentPlayer...")
+                setStatus("Moving ${if (player is User) "your" else "computer's"} piece...")
             }
 
             override fun onAnimationEnd(animation: Animation) {
@@ -165,7 +168,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun rollDice(player: GPlayer, callback: (Int) -> Unit) {
-        setStatus("${player.name} rolling dice...")
+        setStatus("${player.name} rolling the dice...")
         die.roll { value ->
             setStatus("${player.name} rolled ${value}...")
             callback(value)
@@ -173,7 +176,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setStatus(status: String) = runOnUiThread {
-        findViewById<TextView>(R.id.gameStatus).text = status
+        findViewById<TextView>(R.id.gameStatus).text = ">> $status"
     }
 
 }
