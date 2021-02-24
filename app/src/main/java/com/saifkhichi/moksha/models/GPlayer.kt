@@ -7,7 +7,7 @@ package com.saifkhichi.moksha.models
  * @since 1.0.0
  */
 sealed class GPlayer(val name: String, val view: Int) {
-    var position: Int = 1
+    var position: Int = 0
 
     /**
      * Checks if the player can move the given number of [steps].

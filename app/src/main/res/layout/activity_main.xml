@@ -102,7 +102,7 @@
       android:layout_margin="15dp"
       android:layout_alignParentBottom="true"
       android:layout_centerHorizontal="true"
-      android:onClick="takeTurn"
-      app:srcCompat="@drawable/one"/>
+      android:background="@drawable/die"
+      android:onClick="takeTurn"/>
 
 </RelativeLayout>

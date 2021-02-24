@@ -6,14 +6,10 @@ import android.view.View
 import android.view.animation.Animation
 import android.view.animation.Animation.AnimationListener
 import android.view.animation.TranslateAnimation
-import android.widget.ImageView
 import android.widget.TextView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import com.saifkhichi.moksha.models.AI
-import com.saifkhichi.moksha.models.GBoard
-import com.saifkhichi.moksha.models.GPlayer
-import com.saifkhichi.moksha.models.User
+import com.saifkhichi.moksha.models.*
 import kotlin.math.abs
 
 class MainActivity : AppCompatActivity() {
@@ -22,7 +18,7 @@ class MainActivity : AppCompatActivity() {
     private val ai = AI("Computer", R.id.computerPiece)
     private val user = User("Player", R.id.userPiece)
 
-    private var dice: ImageView? = null
+    private lateinit var die: Die
     private val SIZE = Point()
     private var isOver = false
 
@@ -31,17 +27,20 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        dice = findViewById(R.id.dice)
+
+        die = Die(findViewById(R.id.dice))
         currentPlayer = 1
+
         windowManager.defaultDisplay.getSize(SIZE)
         findViewById<View>(R.id.board).post { SIZE.y = findViewById<View>(R.id.board).height }
     }
 
     fun takeTurn(v: View?) {
         if (!isOver) {
-            val diceValue = rollDice(user)
             if (currentPlayer == 1) {
-                takeTurn(user, diceValue)
+                rollDice(user) { value ->
+                    takeTurn(user, value)
+                }
             }
         }
     }
@@ -99,7 +98,9 @@ class MainActivity : AppCompatActivity() {
             1 -> {
                 currentPlayer = 2
                 setStatus("${ai.name}'s Turn")
-                takeTurn(ai, rollDice(ai))
+                rollDice(ai) { value ->
+                    takeTurn(ai, value)
+                }
             }
             2 -> {
                 currentPlayer = 1
@@ -163,42 +164,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun rollDice(player: GPlayer): Int {
+    private fun rollDice(player: GPlayer, callback: (Int) -> Unit) {
         setStatus("${player.name} rolling dice...")
-        val diceImages = arrayOf(
-            R.drawable.one,
-            R.drawable.two,
-            R.drawable.three,
-            R.drawable.four,
-            R.drawable.five,
-            R.drawable.six,
-        )
-
-        val value = (Math.random() * 6).toInt()
-        this.dice?.setImageResource(diceImages[value])
-        setStatus("${player.name} rolled ${value + 1}...")
-        return value + 1
+        die.roll { value ->
+            setStatus("${player.name} rolled ${value}...")
+            callback(value)
+        }
     }
 
     private fun setStatus(status: String) = runOnUiThread {
         findViewById<TextView>(R.id.gameStatus).text = status
     }
-
-//    public boolean onTouchEvent(MotionEvent event) {
-//        ImageView img_animation = (ImageView) findViewById(R.id.maze);
-//        int[] viewCoords = new int[2];
-//        img_animation.getLocationOnScreen(viewCoords);
-//
-//        int touchX = (int) event.getX();
-//        int touchY = (int) event.getY();
-//
-//        int imageX = touchX - viewCoords[0]; // viewCoords[0] is the X coordinate
-//        int imageY = touchY - viewCoords[1]; // viewCoords[1] is the y coordinate
-//
-//        // float x = event.getX();
-//        //float y = event.getY();
-//        Toast.makeText(MainActivity.this,"X = "+imageX+" and y ="+imageY,Toast.LENGTH_SHORT).show();
-//        return super.onTouchEvent(event);
-//    }
 
 }
