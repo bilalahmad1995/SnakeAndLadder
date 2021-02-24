@@ -18,22 +18,50 @@ class MainActivity : AppCompatActivity() {
     private val ai = AI("Computer", R.id.computerPiece)
     private val user = User("Player", R.id.userPiece)
 
-    private lateinit var die: Die
+    private lateinit var dieUser: Die
+    private lateinit var dieAI: Die
     private val SIZE = Point()
     private var isOver = false
 
     private var dx = 0f
     private var dy = 0f
 
-    private var currentPlayer = 0
+    private var currentPlayer: GPlayer = user
+        set(value) {
+            field = value
+            when (value) {
+                is AI -> {
+                    dieAI.show()
+                    dieUser.hide()
+                    setStatus("${value.name}'s turn.")
+
+                    rollDice(dieAI, ai) {
+                        takeTurn(ai, it)
+                    }
+                }
+                is User -> {
+                    dieAI.hide()
+                    dieUser.show()
+                    setStatus("Your turn. Roll the dice!")
+                }
+            }
+        }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        die = Die(findViewById(R.id.dice))
-        currentPlayer = 1
+        dieUser = Die(findViewById(R.id.dice))
+        dieUser.show()
+
+        dieAI = Die(findViewById(R.id.die_ai))
+        dieAI.hide()
+
+        currentPlayer = user
         setStatus("Your turn. Roll the dice!")
+
+        findViewById<TextView>(R.id.computerName).text = ai.name
+        findViewById<TextView>(R.id.playerName).text = user.name
 
         windowManager.defaultDisplay.getSize(SIZE)
         val boardContainer = findViewById<View>(R.id.board_container)
@@ -47,8 +75,8 @@ class MainActivity : AppCompatActivity() {
 
     fun takeTurn(v: View?) {
         if (!isOver) {
-            if (currentPlayer == 1) {
-                rollDice(user) { value ->
+            if (currentPlayer is User) {
+                rollDice(dieUser, user) { value ->
                     takeTurn(user, value)
                 }
             }
@@ -57,7 +85,7 @@ class MainActivity : AppCompatActivity() {
 
     private fun takeTurn(player: GPlayer, steps: Int) {
         // Move the player
-        if (!player.canMove(steps)) return onMoved()
+        if (!player.canMove(steps)) return onMoved(0) // TODO: Move forward, then backwards
         val lastPosition = player.position
         val newPosition = lastPosition + steps
 
@@ -68,6 +96,13 @@ class MainActivity : AppCompatActivity() {
             // Check if the player has won
             if (player.hasWon()) {
                 setStatus("You ${if (player is User) "won" else "lost"}! Game over.")
+
+                // Update UI
+                when (player) {
+                    is AI -> findViewById<TextView>(R.id.computerPosition)
+                    is User -> findViewById(R.id.playerPosition)
+                }.text = "${player.position}"
+
                 isOver = true
             } else {
                 board.snakes.forEach { snake ->
@@ -87,27 +122,23 @@ class MainActivity : AppCompatActivity() {
                     when (player) {
                         is AI -> findViewById<TextView>(R.id.computerPosition)
                         is User -> findViewById(R.id.playerPosition)
-                    }.text = "${player.name}\n${player.position}"
+                    }.text = "${player.position}"
 
                     // Check post-conditions
-                    onMoved()
+                    onMoved(steps)
                 }
             }
         }
     }
 
-    private fun onMoved() {
-        if (!isOver) when (currentPlayer) {
-            1 -> {
-                currentPlayer = 2
-                setStatus("${ai.name}'s turn.")
-                rollDice(ai) { value ->
-                    takeTurn(ai, value)
+    private fun onMoved(lastRoll: Int) {
+        if (!isOver) {
+            currentPlayer = when (lastRoll) {
+                6 -> currentPlayer
+                else -> when (currentPlayer) {
+                    is User -> ai
+                    is AI -> user
                 }
-            }
-            2 -> {
-                currentPlayer = 1
-                setStatus("Your turn. Roll the dice!")
             }
         }
     }
@@ -167,7 +198,7 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun rollDice(player: GPlayer, callback: (Int) -> Unit) {
+    private fun rollDice(die: Die, player: GPlayer, callback: (Int) -> Unit) {
         setStatus("${player.name} rolling the dice...")
         die.roll { value ->
             setStatus("${player.name} rolled ${value}...")

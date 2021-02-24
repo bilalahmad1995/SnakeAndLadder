@@ -1,6 +1,7 @@
 package com.saifkhichi.moksha.models
 
 import android.graphics.drawable.AnimationDrawable
+import android.view.View
 import android.view.animation.Animation
 import android.view.animation.TranslateAnimation
 import android.widget.ImageView
@@ -14,7 +15,7 @@ import kotlin.random.nextInt
  * @author saifkhichi96
  * @since 1.0.0
  */
-class Die(private val view: ImageView) {
+class Die(val view: ImageView) {
 
     private val frames = arrayOf(
         R.drawable.one,
@@ -38,6 +39,7 @@ class Die(private val view: ImageView) {
     }
 
     fun roll(seed: Long? = null, onFinished: (value: Int) -> Unit) {
+        view.isEnabled = false
         val random: Random = when (seed) {
             null -> Random.Default
             else -> Random(seed)
@@ -78,6 +80,15 @@ class Die(private val view: ImageView) {
         }
 
         override fun onAnimationRepeat(animation: Animation?) {}
+    }
+
+    fun hide() {
+        view.visibility = View.GONE
+    }
+
+    fun show() {
+        view.visibility = View.VISIBLE
+        view.isEnabled = true
     }
 
     companion object {

@@ -14,29 +14,6 @@
       android:layout_height="match_parent"
       android:layout_alignParentTop="true">
 
-    <com.google.android.material.textview.MaterialTextView
-        style="@style/TextAppearance.MaterialComponents.Subtitle1"
-        android:id="@+id/playerPosition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="5dp"
-        android:text="@string/label_player_user"/>
-
-    <com.google.android.material.textview.MaterialTextView
-        style="@style/TextAppearance.MaterialComponents.Subtitle1"
-        android:id="@+id/computerPosition"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_alignParentTop="true"
-        android:layout_margin="5dp"
-        android:gravity="end"
-        android:text="@string/label_player_computer"/>
-
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/board_container"
         android:layout_width="match_parent"
@@ -55,28 +32,6 @@
           app:srcCompat="@drawable/maze"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:scaleType="centerInside"
-        android:layout_below="@id/playerPosition"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true"
-        app:srcCompat="@drawable/piece"
-        app:tint="@color/colorPlayer"
-        app:tintMode="multiply"/>
-
-    <androidx.appcompat.widget.AppCompatImageView
-        android:layout_width="32dp"
-        android:layout_height="32dp"
-        android:scaleType="centerInside"
-        android:layout_below="@id/computerPosition"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        app:srcCompat="@drawable/piece"
-        app:tint="@color/colorComputer"
-        app:tintMode="multiply"/>
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/userPiece"
@@ -100,6 +55,111 @@
 
   </RelativeLayout>
 
+  <!-- Player Summary -->
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentStart="true"
+      android:layout_margin="16dp"
+      android:layout_above="@id/gameStatus"
+      android:gravity="center"
+      android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:layout_marginRight="4dp"
+        android:layout_marginEnd="4dp"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorPlayer"
+        app:tintMode="multiply"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Subtitle2"
+          android:id="@+id/playerName"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="@string/label_player_user"
+          android:textStyle="bold"
+          app:textAllCaps="true"/>
+
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Headline6"
+          android:id="@+id/playerPosition"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="0"
+          android:textStyle="bold"/>
+
+    </LinearLayout>
+
+  </LinearLayout>
+
+  <!-- AI Summary -->
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_alignParentTop="true"
+      android:layout_margin="16dp"
+      android:gravity="center"
+      android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Subtitle2"
+          android:id="@+id/computerName"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="@string/label_player_computer"
+          android:textStyle="bold"
+          app:textAllCaps="true"/>
+
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Headline6"
+          android:id="@+id/computerPosition"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="0"
+          android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:layout_marginStart="4dp"
+        android:layout_marginLeft="4dp"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorComputer"
+        app:tintMode="multiply"/>
+
+  </LinearLayout>
+
+  <!-- Die -->
   <androidx.appcompat.widget.AppCompatImageView
       android:id="@+id/dice"
       android:layout_width="75dp"
@@ -111,6 +171,19 @@
       android:background="@drawable/die"
       android:onClick="takeTurn"/>
 
+  <!-- Die -->
+  <androidx.appcompat.widget.AppCompatImageView
+      android:id="@+id/die_ai"
+      android:layout_width="75dp"
+      android:layout_height="75dp"
+      android:layout_margin="16dp"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentTop="true"
+      android:background="@drawable/die"
+      android:visibility="gone"/>
+
+  <!-- Status Bar -->
   <com.google.android.material.textview.MaterialTextView
       style="@style/TextAppearance.MaterialComponents.Subtitle1"
       android:id="@+id/gameStatus"
