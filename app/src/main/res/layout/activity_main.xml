@@ -1,100 +1,201 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/activity_main"
     android:layout_width="match_parent"
+    android:background="@drawable/table_top"
     android:layout_height="match_parent"
-    tools:context="com.example.bilalahmad.snakeandladder.MainActivity">
+    tools:context=".MainActivity">
 
-    <RelativeLayout
+  <RelativeLayout
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
+      android:layout_alignParentTop="true">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/board_container"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@+id/dice"
-        android:layout_alignParentTop="true">
+        android:layout_height="wrap_content"
+        android:layout_centerVertical="true"
+        android:layout_marginHorizontal="16dp">
 
-        <TextView
-            android:id="@+id/playerPosition"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
-            android:text="Player\n1"/>
+      <androidx.appcompat.widget.AppCompatImageView
+          android:id="@+id/board"
+          android:layout_width="0dp"
+          android:layout_height="0dp"
+          app:layout_constraintDimensionRatio="H,1:1"
+          app:layout_constraintRight_toRightOf="parent"
+          app:layout_constraintLeft_toLeftOf="parent"
+          app:layout_constraintBottom_toBottomOf="parent"
+          app:srcCompat="@drawable/maze"/>
 
-        <TextView
-            android:id="@+id/gameStatus"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
-            android:gravity="end"
-            android:text="Player's Turn"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
-        <TextView
-            android:id="@+id/computerPosition"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="5dp"
-            android:gravity="end"
-            android:text="Computer\n1"/>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/userPiece"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorPlayer"
+        app:tintMode="multiply"/>
 
-        <ImageView
-            android:id="@+id/board"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="fitEnd"
-            app:srcCompat="@drawable/maze" />
+    <androidx.appcompat.widget.AppCompatImageView
+        android:id="@+id/computerPiece"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:scaleType="centerInside"
+        android:visibility="gone"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorComputer"
+        app:tintMode="multiply"/>
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:layout_below="@id/playerPosition"
-            android:layout_alignParentLeft="true"
-            android:tint="#0f0"/>
+  </RelativeLayout>
 
-        <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:layout_below="@id/computerPosition"
-            android:layout_alignParentRight="true"
-            android:tint="#f00"/>
+  <!-- Player Summary -->
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentStart="true"
+      android:layout_margin="16dp"
+      android:layout_above="@id/gameStatus"
+      android:gravity="center"
+      android:orientation="horizontal">
 
-        <ImageView
-            android:id="@+id/userPiece"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:tint="#0f0"
-            android:visibility="gone"/>
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:layout_marginRight="4dp"
+        android:layout_marginEnd="4dp"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorPlayer"
+        app:tintMode="multiply"/>
 
-        <ImageView
-            android:id="@+id/computerPiece"
-            android:layout_width="30dp"
-            android:layout_height="30dp"
-            android:scaleType="centerInside"
-            android:src="@drawable/piece"
-            android:tint="#f00"
-            android:visibility="gone"/>
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
 
-    </RelativeLayout>
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Subtitle2"
+          android:id="@+id/playerName"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="@string/label_player_user"
+          android:textStyle="bold"
+          app:textAllCaps="true"/>
 
-    <ImageView
-        android:id="@+id/dice"
-        android:layout_width="75dp"
-        android:layout_height="75dp"
-        android:layout_margin="15dp"
-        app:srcCompat="@drawable/one"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:onClick="takeTurn"/>
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Headline6"
+          android:id="@+id/playerPosition"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="0"
+          android:textStyle="bold"/>
+
+    </LinearLayout>
+
+  </LinearLayout>
+
+  <!-- AI Summary -->
+  <LinearLayout
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_alignParentTop="true"
+      android:layout_margin="16dp"
+      android:gravity="center"
+      android:orientation="horizontal">
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="vertical">
+
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Subtitle2"
+          android:id="@+id/computerName"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="@string/label_player_computer"
+          android:textStyle="bold"
+          app:textAllCaps="true"/>
+
+      <com.google.android.material.textview.MaterialTextView
+          style="@style/TextAppearance.MaterialComponents.Headline6"
+          android:id="@+id/computerPosition"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:textAlignment="center"
+          android:layout_gravity="center"
+          android:text="0"
+          android:textStyle="bold"/>
+
+    </LinearLayout>
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:scaleType="centerInside"
+        android:layout_marginStart="4dp"
+        android:layout_marginLeft="4dp"
+        app:srcCompat="@drawable/piece"
+        app:tint="@color/colorComputer"
+        app:tintMode="multiply"/>
+
+  </LinearLayout>
+
+  <!-- Die -->
+  <androidx.appcompat.widget.AppCompatImageView
+      android:id="@+id/dice"
+      android:layout_width="75dp"
+      android:layout_height="75dp"
+      android:layout_margin="16dp"
+      android:layout_alignParentEnd="true"
+      android:layout_alignParentRight="true"
+      android:layout_above="@id/gameStatus"
+      android:background="@drawable/die"
+      android:onClick="takeTurn"/>
+
+  <!-- Die -->
+  <androidx.appcompat.widget.AppCompatImageView
+      android:id="@+id/die_ai"
+      android:layout_width="75dp"
+      android:layout_height="75dp"
+      android:layout_margin="16dp"
+      android:layout_alignParentStart="true"
+      android:layout_alignParentLeft="true"
+      android:layout_alignParentTop="true"
+      android:background="@drawable/die"
+      android:visibility="gone"/>
+
+  <!-- Status Bar -->
+  <com.google.android.material.textview.MaterialTextView
+      style="@style/TextAppearance.MaterialComponents.Subtitle1"
+      android:id="@+id/gameStatus"
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:layout_alignParentBottom="true"
+      android:background="#424242"
+      android:padding="8dp"
+      android:gravity="start"
+      android:text="@string/game_status"
+      android:textColor="@color/colorPlayer"
+      android:textStyle="bold"
+      app:fontFamily="serif-monospace"/>
 
 </RelativeLayout>
